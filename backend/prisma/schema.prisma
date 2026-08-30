@@ -1,0 +1,99 @@
+// CampusCare Prisma Schema for PostgreSQL
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum ComplaintCategory {
+  WIFI_IT
+  ELECTRICAL
+  PLUMBING
+  CLASSROOM_EQUIPMENT
+  HOSTEL_MAINTENANCE
+  CLEANLINESS
+  TRANSPORT
+  INFRASTRUCTURE
+  SECURITY
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ComplaintStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(STUDENT)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  complaints   Complaint[]
+  feedbacks    Feedback[]
+
+  @@map("users")
+}
+
+model Complaint {
+  id           Int               @id @default(autoincrement())
+  userId       String
+  title        String
+  description  String            @db.Text
+  category     ComplaintCategory
+  location     String
+  priority     Priority          @default(MEDIUM)
+  status       ComplaintStatus   @default(PENDING)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  // AI Classification & Analysis (Advisory / Optional)
+  aiCategory   String?
+  aiPriority   String?
+  aiSummary    String?           @db.Text
+  aiReason     String?           @db.Text
+  aiDepartment String?
+  aiConfidence Float?
+
+  // Relations
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feedback     Feedback?
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@map("complaints")
+}
+
+model Feedback {
+  id          String    @id @default(cuid())
+  complaintId Int       @unique
+  userId      String
+  rating      Int       // 1 to 5 stars
+  comment     String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("feedbacks")
+}

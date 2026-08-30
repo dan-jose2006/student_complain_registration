@@ -1,0 +1,37 @@
+{
+  "name": "campuscare",
+  "version": "1.0.0",
+  "description": "CampusCare - AI-Powered Smart Campus Issue & Service Management System",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n \"BACKEND,FRONTEND\" -c \"blue.bold,magenta.bold\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test",
+    "seed": "npm --prefix backend run db:seed",
+    "db:generate": "npm --prefix backend run db:generate",
+    "db:push": "npm --prefix backend run db:push",
+    "db:migrate": "npm --prefix backend run db:migrate",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd .."
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "campuscare",
+    "smart-campus",
+    "issue-management",
+    "waterfall-model",
+    "groq-ai",
+    "react",
+    "express",
+    "prisma",
+    "postgresql",
+    "typescript"
+  ],
+  "author": "CampusCare Engineering Team",
+  "license": "MIT"
+}
