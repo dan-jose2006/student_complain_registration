@@ -1,4 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE =
+  import.meta.env.PROD
+    ? (import.meta.env.VITE_API_URL?.startsWith('http') ? import.meta.env.VITE_API_URL : '/api')
+    : (import.meta.env.VITE_API_URL || '/api');
 
 export class ApiError extends Error {
   statusCode: number;

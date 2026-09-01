@@ -4,11 +4,15 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  root: path.resolve(__dirname),
   plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  build: {
+    outDir: 'dist',
   },
   server: {
     port: 5173,

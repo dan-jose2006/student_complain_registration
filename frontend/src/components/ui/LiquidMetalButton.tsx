@@ -287,7 +287,7 @@ export const LiquidMetalButton: React.FC<LiquidMetalButtonProps> = ({
             onMouseDown={() => setIsPressed(true)}
             onMouseUp={() => setIsPressed(false)}
             disabled={disabled || isLoading}
-            className="absolute inset-0 w-full h-full bg-transparent border-0 cursor-pointer outline-none z-40 rounded-full overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute inset-0 w-full h-full bg-transparent border-0 cursor-pointer outline-none z-40 rounded-full overflow-hidden whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               transformStyle: 'preserve-3d',
               transform: 'translateZ(25px)',

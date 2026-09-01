@@ -429,19 +429,28 @@ class ResilientDB {
 // Resilient DB instance
 const resilientDb = new ResilientDB();
 
-// Test connection check to determine if real PostgreSQL is active or resilient storage should be used
-let useFallback = true;
+// Determine if live database should be default
+const hasValidDbUrl = Boolean(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost:5432'));
+let useFallback = !hasValidDbUrl;
 
-// Check if PostgreSQL server is alive
+if (hasValidDbUrl) {
+  logger.info('🐘 PostgreSQL database target detected in environment');
+}
+
+// Test connection check
 realPrisma
   .$queryRaw`SELECT 1`
   .then(() => {
     useFallback = false;
     logger.info('🐘 PostgreSQL database connected successfully via Prisma');
   })
-  .catch(() => {
-    useFallback = true;
-    logger.info('📦 Local in-memory PostgreSQL simulation mode active (Seamless Zero-Config Execution)');
+  .catch((err: any) => {
+    if (!hasValidDbUrl) {
+      useFallback = true;
+      logger.info('📦 Local in-memory PostgreSQL simulation mode active (Seamless Zero-Config Execution)');
+    } else {
+      logger.error('PostgreSQL connection check failed, continuing with direct Prisma Client:', err?.message || err);
+    }
   });
 
 // Proxy router: routes to realPrisma or resilientDb dynamically
