@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { AIController } from '../controllers/ai.controller';
 import { authenticate, requireAdmin } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { analyzeComplaintSchema } from '../validators/ai.validator';
+import { analyzeComplaintSchema, reframeDescriptionSchema } from '../validators/ai.validator';
 
 const router = Router();
 
@@ -14,6 +14,13 @@ router.post(
   '/analyze-complaint',
   validate(analyzeComplaintSchema),
   AIController.analyzeComplaint
+);
+
+// Reframe/improve complaint description with AI
+router.post(
+  '/reframe-description',
+  validate(reframeDescriptionSchema),
+  AIController.reframeDescription
 );
 
 // Admin-only strategic campus insights

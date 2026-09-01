@@ -127,6 +127,73 @@ Output JSON Schema:
   }
 
   /**
+   * Rewrites a student's raw complaint description into clear, professional language.
+   */
+  static async reframeDescription(
+    description: string,
+    title?: string
+  ): Promise<{ reframed: string; improvements: string[] }> {
+    const client = this.getClient();
+
+    if (client) {
+      try {
+        const prompt = `You are an expert writing assistant for a university campus complaint system.
+A student has written the following complaint description. Rewrite it to be clear, professional, and detailed enough for the maintenance team to act on it quickly.
+
+${title ? `Issue Title: "${title}"` : ''}
+Original Description: "${description}"
+
+Rules:
+- Keep all facts and details from the original
+- Fix grammar, spelling, and punctuation
+- Make it more specific and actionable
+- Keep it concise (2-5 sentences max)
+- Write in first person from the student's perspective
+- Do NOT add information that wasn't in the original
+
+Return ONLY a valid JSON object (no markdown):
+{
+  "reframed": "<the improved description>",
+  "improvements": ["<short note on improvement 1>", "<short note on improvement 2>"]
+}`;
+
+        const completion = await client.chat.completions.create({
+          model: config.groqModel,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a writing assistant. You only respond with pure valid JSON without markdown wrapping.',
+            },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.4,
+          max_tokens: 300,
+        });
+
+        const rawContent = completion.choices[0]?.message?.content?.trim() || '{}';
+        const cleanedJson = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const parsed = JSON.parse(cleanedJson);
+
+        return {
+          reframed: parsed.reframed || description,
+          improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 3) : [],
+        };
+      } catch (error) {
+        logger.warn('Groq reframe failed, returning original description:', error);
+      }
+    }
+
+    // Fallback: basic cleanup
+    const cleaned = description.trim().replace(/\s+/g, ' ');
+    const capitalized = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    const withPeriod = capitalized.endsWith('.') ? capitalized : capitalized + '.';
+    return {
+      reframed: withPeriod,
+      improvements: ['Fixed capitalization and spacing'],
+    };
+  }
+
+  /**
    * High-accuracy deterministic heuristic analysis when Groq is unavailable.
    */
   private static fallbackAnalyze(

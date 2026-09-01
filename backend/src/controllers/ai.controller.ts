@@ -19,6 +19,20 @@ export class AIController {
     }
   }
 
+  static async reframeDescription(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { description, title } = req.body;
+      const result = await AIService.reframeDescription(description, title);
+      ApiResponse.success(res, result, 'Description reframed successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getAdminInsights(
     req: AuthenticatedRequest,
     res: Response,
