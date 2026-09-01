@@ -1,9 +1,19 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { logger } from '../utils/logger';
+import { config } from './index';
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = config.databaseUrl;
+}
 
 // Real Prisma Client
 const realPrisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || config.databaseUrl,
+    },
+  },
   log: ['error'],
 });
 
