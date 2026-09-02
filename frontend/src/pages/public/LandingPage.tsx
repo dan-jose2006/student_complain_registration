@@ -1,11 +1,20 @@
+// Import React core library
 import React from 'react';
+// Import Link component from React Router for client-side navigation
 import { Link } from 'react-router-dom';
+// Import custom theme hook to detect active dark/light mode
 import { useTheme } from '../../context/ThemeContext';
+// Import standard UI button component
 import { Button } from '../../components/ui/Button';
+// Import liquid metal animated button component for hero CTAs
 import { LiquidMetalButton } from '../../components/ui/LiquidMetalButton';
+// Import modular card layout containers
 import { Card, CardContent } from '../../components/ui/Card';
+// Import badge component for status badges and chip tags
 import { Badge } from '../../components/ui/Badge';
+// Import Prism 3D background animation component
 import { Prism } from '../../components/ui/Prism';
+// Import Lucide React iconography for features and metrics
 import {
   Sparkles,
   ArrowRight,
@@ -17,15 +26,24 @@ import {
   Activity,
   CheckCircle2,
 } from 'lucide-react';
+// Import Framer Motion for scroll reveals and entry animations
 import { motion } from 'framer-motion';
 
+/**
+ * LandingPage Component
+ * Public homepage presenting CampusCare's features, live metrics, interactive 3D Prism, and navigation links.
+ */
 export const LandingPage: React.FC = () => {
+  // Access global theme state (dark or light mode)
   const { theme } = useTheme();
+  // Flag indicating if light mode is currently active
   const isLight = theme === 'light';
 
+  // Feature highlights card data configuration
   const featureCards = [
     {
       icon: Cpu,
+
       title: 'Groq AI Auto-Triage',
       desc: 'Real-time natural language classification suggests complaint category, urgency, department, and summary in under a second.',
       tag: 'AI Intelligence',

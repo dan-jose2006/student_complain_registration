@@ -1,13 +1,18 @@
 /** @type {import('tailwindcss').Config} */
+// Tailwind CSS configuration module
 export default {
+  // Enables class-based dark mode toggling (using 'dark' class on <html> or <body>)
   darkMode: 'class',
+  // Scan all HTML and source files for Tailwind class names to generate minimal bundle
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    // Extend default theme tokens with design system custom properties
     extend: {
       colors: {
+        // Dynamic HSL CSS variable colors for theme compatibility
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -37,6 +42,7 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Brand slate-indigo color scale
         brand: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -51,21 +57,25 @@ export default {
           950: '#020617',
         },
       },
+      // Configurable border radiuses derived from CSS variable --radius
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      // Box shadow presets for cards, hovers, and neon glows
       boxShadow: {
         'glow': '0 0 25px -5px rgba(255, 255, 255, 0.15)',
         'card': '0 2px 10px -1px rgba(0, 0, 0, 0.05), 0 1px 3px -1px rgba(0, 0, 0, 0.03)',
         'card-hover': '0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06)',
       },
+      // Micro-animation utilities
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.4s ease-out',
       },
+      // Custom keyframe definitions for animations
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -78,5 +88,7 @@ export default {
       },
     },
   },
+  // Additional Tailwind plugins array
   plugins: [],
-}
+};
+
