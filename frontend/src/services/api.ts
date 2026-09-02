@@ -1,7 +1,8 @@
-const API_BASE =
-  import.meta.env.PROD
-    ? (import.meta.env.VITE_API_URL?.startsWith('http') ? import.meta.env.VITE_API_URL : '/api')
-    : (import.meta.env.VITE_API_URL || '/api');
+// In production always use relative /api (same domain, handled by vercel.json rewrites)
+// In development use VITE_API_URL from .env.local, falling back to /api
+const API_BASE = import.meta.env.PROD
+  ? '/api'
+  : (import.meta.env.VITE_API_URL || 'http://localhost:3000/api');
 
 export class ApiError extends Error {
   statusCode: number;
