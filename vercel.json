@@ -3,6 +3,11 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -23,3 +28,4 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+

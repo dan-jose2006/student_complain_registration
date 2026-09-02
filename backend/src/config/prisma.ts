@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 import { logger } from '../utils/logger';
 import { config } from './index';
 
@@ -17,6 +16,14 @@ const realPrisma = new PrismaClient({
   log: ['error'],
 });
 
+// Pre-computed bcrypt hashes for seed accounts (cost factor 10).
+// These are hard-coded to avoid running expensive bcrypt.hashSync on every cold start,
+// which would block the serverless function's CPU and cause "Failed to fetch" errors.
+// Admin@123  → $2b$10$zYEVTnKtxeoQ9dh/ITe5O.Aybkek0pogOC7Pd8FhuwD9NHV08Mh8G
+// Student@123 → $2b$10$zu34K3gOhCP8y/EGmx2KA.50majsVvZyxn8Z1MHcAF6elOwr7TrPm
+const SEED_ADMIN_HASH = '$2b$10$zYEVTnKtxeoQ9dh/ITe5O.Aybkek0pogOC7Pd8FhuwD9NHV08Mh8G';
+const SEED_STUDENT_HASH = '$2b$10$zu34K3gOhCP8y/EGmx2KA.50majsVvZyxn8Z1MHcAF6elOwr7TrPm';
+
 // Resilient In-Memory Storage Adapter for local execution without live Postgres instance
 class ResilientDB {
   users: any[] = [];
@@ -33,9 +40,10 @@ class ResilientDB {
     if (this.initialized) return;
     this.initialized = true;
 
-    const salt = bcrypt.genSaltSync(10);
-    const adminHash = bcrypt.hashSync('Admin@123', salt);
-    const studentHash = bcrypt.hashSync('Student@123', salt);
+    // Use pre-computed hashes — no synchronous bcrypt work needed on cold start
+    const adminHash = SEED_ADMIN_HASH;
+    const studentHash = SEED_STUDENT_HASH;
+
 
     const admin = {
       id: 'usr_admin_01',
