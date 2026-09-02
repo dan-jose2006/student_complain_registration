@@ -18,7 +18,29 @@ export const createApp = (): Application => {
   app.use(helmet());
   app.use(
     cors({
-      origin: [config.frontendUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+
+        const allowedPatterns = [
+          /^https?:\/\/localhost(:\d+)?$/,
+          /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+          /^https:\/\/.*\.vercel\.app$/,
+          /^https:\/\/softwareproject-zeta\.vercel\.app$/,
+        ];
+
+        // Also allow the configured FRONTEND_URL env var
+        if (config.frontendUrl && origin === config.frontendUrl) {
+          return callback(null, true);
+        }
+
+        const isAllowed = allowedPatterns.some((pattern) => pattern.test(origin));
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin ${origin} not allowed`));
+        }
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
