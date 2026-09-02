@@ -85,13 +85,14 @@ export async function apiRequest<T>(
     // Return standardized nested data property or top-level payload
     return data.data !== undefined ? data.data : data;
   } catch (error: any) {
-    // Re-throw if already an ApiError
+    // Re-throw if already an ApiError (has already been formatted)
     if (error instanceof ApiError) {
       throw error;
     }
-    // Wrap generic network/fetch failures in ApiError with HTTP 500
+    // Wrap generic fetch/network errors (e.g. serverless cold-start timeout, no internet)
+    // Provide a user-friendly message that helps diagnose the issue
     throw new ApiError(
-      error.message || 'Network error. Please check your internet connection.',
+      'Unable to reach the server. Please check your internet connection and try again.',
       500
     );
   }

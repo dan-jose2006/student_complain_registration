@@ -436,18 +436,29 @@ class ResilientDB {
   async $disconnect() {}
 }
 
-// Resilient DB instance
+// Resilient DB instance (used as in-memory fallback when no real DB is available)
 const resilientDb = new ResilientDB();
 
-// Determine if live database should be default
+// Check if a real remote PostgreSQL DATABASE_URL is configured (non-localhost)
 const hasValidDbUrl = Boolean(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost:5432'));
+
+// For Vercel serverless: add connection pool limits to prevent connection exhaustion
+// connection_limit=1 ensures each function instance uses only one connection
+// pool_timeout=10 prevents hanging indefinitely waiting for a connection
+if (hasValidDbUrl && process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('connection_limit')) {
+  const separator = process.env.DATABASE_URL.includes('?') ? '&' : '?';
+  process.env.DATABASE_URL = `${process.env.DATABASE_URL}${separator}connection_limit=1&pool_timeout=10&connect_timeout=10`;
+}
+
+// Default to fallback only when there is no valid DB URL configured
 let useFallback = !hasValidDbUrl;
 
 if (hasValidDbUrl) {
   logger.info('🐘 PostgreSQL database target detected in environment');
 }
 
-// Test connection check
+// Perform an async connection test — but do NOT race against incoming requests.
+// If connected successfully, switch to real Prisma. If not, fall back gracefully.
 realPrisma
   .$queryRaw`SELECT 1`
   .then(() => {
@@ -456,14 +467,17 @@ realPrisma
   })
   .catch((err: any) => {
     if (!hasValidDbUrl) {
+      // No real DB configured — expected to use in-memory mode
       useFallback = true;
       logger.info('📦 Local in-memory PostgreSQL simulation mode active (Seamless Zero-Config Execution)');
     } else {
-      logger.error('PostgreSQL connection check failed, continuing with direct Prisma Client:', err?.message || err);
+      // Real DB configured but connection failed — log error but still attempt real Prisma
+      // (individual query errors will surface per request rather than failing silently)
+      logger.error('⚠️ PostgreSQL connection test failed. Requests will still attempt real DB:', err?.message || err);
     }
   });
 
-// Proxy router: routes to realPrisma or resilientDb dynamically
+// Proxy router: dynamically routes database calls to realPrisma or resilientDb
 export const prisma: any = new Proxy(
   {},
   {
@@ -477,3 +491,4 @@ export const prisma: any = new Proxy(
 );
 
 export default prisma;
+
